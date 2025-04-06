@@ -11,33 +11,32 @@ void EVENT_MANAGER_Init(void) {
 
 
 bool EVENT_MANAGER_RegisterEvent(Event* event, OnEventHandler onEvent, void* context) {
-	Event* temp = head;
+    Event* temp = head;
 	if(NULL == event) return false;
 	if(NULL == onEvent) return false;
-		
-	event->isScheduled = false;
-	event->scheduledTime = 0;
-	event->onEvent = onEvent;
-	event->context = context;
-    event->next = NULL;
-    
+
 	if(head == NULL){
 	    head = event;
+    	event->isScheduled = false;
+	    event->scheduledTime = 0;
+	    event->onEvent = onEvent;
+	    event->context = context;
+        event->next = NULL;
         return true;
 	}
-	else
-	{
-	while(temp!=NULL){
-	        //if(temp==event) return false;
-	        
+	    while(temp!=NULL){
 	        if(temp->next==NULL){
-	        temp->next=event;
-            return true;
+	           	temp->next=event; 		
+	            event->isScheduled = false;
+	            event->scheduledTime = 0;
+	            event->onEvent = onEvent;
+	            event->context = context;
+                event->next = NULL;
+	            return true; 
 	        }
-	        else temp = temp->next;
-	    }
-	}
-    return false;
+	        temp=temp->next;
+	        }
+	return false;
 }
 
 
