@@ -12,29 +12,26 @@ void EVENT_MANAGER_Init(void) {
 
 bool EVENT_MANAGER_RegisterEvent(Event* event, OnEventHandler onEvent, void* context) {
 	Event* temp = head;
-	if(NULL==event) return false;
+	if(NULL == event) return false;
 	if(NULL == onEvent) return false;
-	
+		
+	event->isScheduled = false;
+	event->scheduledTime = 0;
+	event->onEvent = onEvent;
+	event->context = context;
+    event->next = NULL;
+    
 	if(head == NULL){
 	    head = event;
-	    event->isScheduled = false;
-	    event->scheduledTime = 0;
-	    event->onEvent = onEvent;
-	    event->context = context;
-        event->next=NULL;
         return true;
 	}
 	else
 	{
-	while(1){
-	        if(temp == event) return false;
+	while(temp!=NULL){
+	        //if(temp==event) return false;
+	        
 	        if(temp->next==NULL){
 	        temp->next=event;
-	        event->isScheduled = false;
-	        event->scheduledTime = 0;
-	        event->onEvent = onEvent;
-	        event->context = context;
-            event->next=NULL;
             return true;
 	        }
 	        else temp = temp->next;
@@ -46,26 +43,27 @@ bool EVENT_MANAGER_RegisterEvent(Event* event, OnEventHandler onEvent, void* con
 
 
 void EVENT_MANAGER_UnregisterEvent(Event* event) {
-    Event* temp1 = head;
-    if(head == NULL) return;
+
+    if(head == NULL || event == NULL) return;
     if(event == head){
         head=event->next;
         return;
 	    }
     
-    while(temp1->next!=event){
+    Event* temp1 = head;
+    while(temp1->next!=NULL){
 	        if(temp1->next==event){
-	            temp1->next==event->next;
+	            temp1->next=event->next;
 	            return;
 	        }
-	        else temp1 = temp1->next;
+	        temp1 = temp1->next;
 	    }
 }
 
 
 bool EVENT_MANAGER_ScheduleEvent(Event* event, uint64_t time) {
     Event* temp = head;
-    while(1){
+    while(temp!=NULL){
 	   if(temp==event){
 	        event->isScheduled = true;
 	        event->scheduledTime = time;
@@ -80,16 +78,12 @@ bool EVENT_MANAGER_ScheduleEvent(Event* event, uint64_t time) {
 void EVENT_MANAGER_Proc(uint64_t currentTime) {
     Event* temp = head;
     while(temp!=NULL){
-        if(temp->next!=NULL){
-    	    if(temp->isScheduled){
+        if(temp->isScheduled){
     	        if(temp->scheduledTime == currentTime){
     	            temp->isScheduled = false;
     	            temp->onEvent(temp, temp->scheduledTime, temp->context);
     	        }
-    	    }
-    	    temp=temp->next;
         }
-        else break;
+        temp=temp->next;
     }
 }
-
